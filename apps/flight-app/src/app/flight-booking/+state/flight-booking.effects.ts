@@ -8,15 +8,28 @@ import * as FlightBookingActions from './flight-booking.actions';
 @Injectable()
 export class FlightBookingEffects {
 
-  loadFlights$ = createEffect(() => this.actions$.pipe(
-    ofType(FlightBookingActions.flightsLoad),
-    switchMap(action => this.flightService.find(
-      action.from,
-      action.to,
-      action.urgent
-    )),
-    map(flights => FlightBookingActions.flightsLoaded({ flights }))
-  ));
+  loadFlights$ = createEffect(() =>
+    /**
+     * Stream 1: Action with data payload and type
+     * - Trigger
+     * - Data Provider
+     */
+    this.actions$.pipe(
+      // Filter
+      ofType(FlightBookingActions.flightsLoad),
+      /**
+       * Stream 2: Backend API call -> Flight Array
+       * - Data Provider
+       */
+      switchMap(action => this.flightService.find(
+        action.from,
+        action.to,
+        action.urgent
+      )),
+      // Transformation
+      map(flights => FlightBookingActions.flightsLoaded({ flights }))
+    )
+  );
 
   constructor(
     private actions$: Actions,
