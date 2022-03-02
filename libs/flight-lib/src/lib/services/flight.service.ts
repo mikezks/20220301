@@ -15,6 +15,15 @@ export class FlightService {
   reqDelay = 1000;
 
   flightsCount$ = new BehaviorSubject<number>(0);
+  /* flights$ = new BehaviorSubject<Flight[]>([]);
+  state$ = new BehaviorSubject<{
+    flights: Flight[],
+    count: number
+  }>({
+    flights: [],
+    count: 0
+  }); */
+
 
   constructor(private http: HttpClient) {}
 
