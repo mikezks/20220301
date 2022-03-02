@@ -2,7 +2,43 @@ import { HttpParams, HttpHeaders, HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Flight } from '@flight-workspace/flight-lib';
-import { catchError, debounceTime, delay, distinctUntilChanged, filter, map, Observable, of, share, Subscription, switchMap, tap, timer } from 'rxjs';
+import { catchError, debounceTime, delay, distinctUntilChanged, EMPTY, filter, interval, merge, Observable, of, raceWith, share, Subscription, switchMap, take, tap, timer } from 'rxjs';
+
+function timedSideEffect<T>(
+  stream$: Observable<T>,
+  timeout: number,
+  sideEffect: () => void
+): Observable<T> {
+  const triggerStream$ = stream$.pipe(share());
+  return merge(
+    triggerStream$,
+    triggerStream$.pipe(
+      raceWith(interval(timeout).pipe(
+        take(1),
+        tap(sideEffect),
+        switchMap(() => EMPTY)
+      ))
+    )
+  );
+}
+
+/* {
+        const apiCall$ = this.load(city).pipe(
+          catchError(() => of([])),
+          delay(4_000),
+          share()
+        );
+        return merge(
+          apiCall$,
+          apiCall$.pipe(
+            raceWith(interval(5_000).pipe(
+              take(1),
+              tap(() => console.log('timeout for side-effect')),
+              switchMap(() => EMPTY)
+            ))
+          )
+        );
+      } */
 
 @Component({
   selector: 'flight-workspace-flight-typeahead',
@@ -42,9 +78,32 @@ export class FlightTypeaheadComponent implements OnInit, OnDestroy {
        * Stream 2: Backend API call -> Flight Array
        * - Data Provider
        */
-      switchMap(city => this.load(city).pipe(
-        catchError(() => of([]))
-      )),
+      switchMap(city => timedSideEffect(
+        this.load(city).pipe(
+          catchError(() => of([])),
+          delay(6_000)
+        ),
+        5_000,
+        () => console.log('timeout for side-effect')
+      )
+      /* {
+        const apiCall$ = this.load(city).pipe(
+          catchError(() => of([])),
+          delay(4_000),
+          share()
+        );
+        return merge(
+          apiCall$,
+          apiCall$.pipe(
+            raceWith(interval(5_000).pipe(
+              take(1),
+              tap(() => console.log('timeout for side-effect')),
+              switchMap(() => EMPTY)
+            ))
+          )
+        );
+      } */
+      ),
       // Side-effect: Change of local state
       tap(() => this.loading = false),
       // Transformation
