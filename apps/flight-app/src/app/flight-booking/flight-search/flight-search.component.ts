@@ -3,15 +3,34 @@
 import { Component, OnInit } from '@angular/core';
 import { Flight } from '@flight-workspace/flight-lib';
 import { Store } from '@ngrx/store';
+import { ComponentStore } from '@ngrx/component-store';
 import { Observable, tap, timer } from 'rxjs';
 import * as fromFlightBooking from '../+state';
 import { RxConnector } from '../../shared/rx-utils/rx-connector';
+
+interface Filter {
+  from: string;
+  to: string;
+  urgent: boolean;
+}
+
+interface LocalState {
+  filters: Filter[];
+}
+
+const initialLocalState: LocalState = {
+  filters: [{
+    from: 'Graz',
+    to: 'Hamburg',
+    urgent: false
+  }]
+};
 
 @Component({
   selector: 'flight-search',
   templateUrl: './flight-search.component.html',
   styleUrls: ['./flight-search.component.css'],
-  providers: [ RxConnector ]
+  providers: [ RxConnector, ComponentStore ]
 })
 export class FlightSearchComponent implements OnInit {
 
@@ -39,8 +58,31 @@ export class FlightSearchComponent implements OnInit {
     5: true
   };
 
+  /**
+   * Updater
+   */
+  addFilter = this.localStore.updater(
+    (state, filter: Filter) => ({
+      ...state,
+      filters: [
+        ...state.filters,
+        filter
+      ]
+    })
+  );
+
+  /**
+   * Selectors
+   */
+  selectFilters$ = this.localStore.select(
+    // Selectors
+    // Projector
+    state => state.filters
+  );
+
   constructor(
     private store: Store<fromFlightBooking.FlightBookingRootState>,
+    private localStore: ComponentStore<LocalState>,
     private rxConnector: RxConnector) {
   }
 
@@ -54,10 +96,18 @@ export class FlightSearchComponent implements OnInit {
         tap(num => console.log(num))
       )
     );
+
+    this.localStore.setState(initialLocalState);
   }
 
   search(): void {
     if (!this.from || !this.to) return;
+
+    this.addFilter({
+      from: this.from,
+      to: this.to,
+      urgent: this.urgent
+    });
 
     this.store.dispatch(
       fromFlightBooking.flightsLoad({
