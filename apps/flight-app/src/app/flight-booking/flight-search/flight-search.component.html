@@ -39,6 +39,18 @@
             Delay 1st Flight
           </button>
 
+          <button class="btn btn-default"
+            [disabled]="(canUndo$ | async) === false"
+            (click)="undoFlights()">
+            <i class="ti-share-alt"></i>
+          </button>
+
+          <button class="btn btn-default)"
+            [disabled]="(canRedo$ | async) === false"
+            (click)="redoFlights()">
+            <i class="ti-share"></i>
+          </button>
+
           <div *ngIf="state.flights">
             {{state.flights.length}} flights found!
           </div>

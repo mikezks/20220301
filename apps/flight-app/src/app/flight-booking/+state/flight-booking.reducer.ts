@@ -40,6 +40,8 @@ const coding = entityStateTodos.entities[1];
 
 export interface State {
   flights: Flight[];
+  undoFlights: Flight[][];
+  redoFlights: Flight[][];
   passenger: Record<
     number,
     {
@@ -59,6 +61,8 @@ export interface State {
 
 export const initialState: State = {
   flights: [],
+  undoFlights: [],
+  redoFlights: [],
   passenger: {
     1: { id: 1, name: 'Smith', firstName: 'Anne' }
   },
@@ -78,12 +82,45 @@ export const reducer = createReducer(
   initialState,
 
   on(FlightBookingActions.flightsLoaded, (state, action) => {
+    const undoFlights = state.flights;
     const flights = action.flights;
-    return { ...state, flights };
+    return {
+      ...state,
+      flights,
+      undoFlights: [
+        ...(undoFlights.length ? [undoFlights] : []),
+        ...state.undoFlights
+      ],
+      redoFlights: []
+    };
   }),
   on(FlightBookingActions.flightUpdate, (state, action) => {
     const flights = state.flights.map(f => f.id === action.flight.id ? action.flight : f);
     return { ...state, flights };
+  }),
+  on(FlightBookingActions.flightsUndo, state => {
+    const undo = state.undoFlights?.[0];
+    return undo ? {
+      ...state,
+      flights: undo,
+      undoFlights: state.undoFlights.slice(1),
+      redoFlights: [
+        state.flights,
+        ...state.redoFlights
+      ]
+    } : state;
+  }),
+  on(FlightBookingActions.flightsRedo, state => {
+    const redo = state.redoFlights?.[0];
+    return redo ? {
+      ...state,
+      flights: redo,
+      undoFlights: [
+        state.flights,
+        ...state.undoFlights
+      ],
+      redoFlights: state.redoFlights.slice(1)
+    } : state;
   }),
 
 );

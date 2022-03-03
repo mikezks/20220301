@@ -52,6 +52,9 @@ export class FlightSearchComponent implements OnInit {
     map(flights => flights.filter(f => f.id < 4))
   ); */
 
+  canUndo$ = this.store.select(fromFlightBooking.canUndo);
+  canRedo$ = this.store.select(fromFlightBooking.canRedo);
+
   // "shopping basket" with selected flights
   basket: { [id: number]: boolean } = {
     3: true,
@@ -91,11 +94,11 @@ export class FlightSearchComponent implements OnInit {
       timer(0, 1_000),
       { next: num => console.log(num) }
     ); */
-    this.rxConnector.connect(
+    /* this.rxConnector.connect(
       timer(0, 1_000).pipe(
         tap(num => console.log(num))
       )
-    );
+    ); */
 
     this.localStore.setState(initialLocalState);
   }
@@ -125,6 +128,18 @@ export class FlightSearchComponent implements OnInit {
         date: addMinutesToDate(flight.date, 15).toISOString(),
         delayed: true
       }})
+    );
+  }
+
+  undoFlights() {
+    this.store.dispatch(
+      fromFlightBooking.flightsUndo()
+    );
+  }
+
+  redoFlights() {
+    this.store.dispatch(
+      fromFlightBooking.flightsRedo()
     );
   }
 }

@@ -59,3 +59,24 @@ export const selectItemsByFilter = <T, K>(
       select(mapFn),
       map(arr => arr.filter(filterFn))
     );
+
+
+export const selectUndo = createSelector(
+  selectFlightBookingState,
+  state => state.undoFlights
+);
+
+export const selectRedo = createSelector(
+  selectFlightBookingState,
+  state => state.redoFlights
+);
+
+export const canUndo = createSelector(
+  selectUndo,
+  undo => !!undo.length
+);
+
+export const canRedo = createSelector(
+  selectRedo,
+  redo => !!redo.length
+);
