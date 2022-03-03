@@ -3,13 +3,15 @@
 import { Component, OnInit } from '@angular/core';
 import { Flight } from '@flight-workspace/flight-lib';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, tap, timer } from 'rxjs';
 import * as fromFlightBooking from '../+state';
+import { RxConnector } from '../../shared/rx-utils/rx-connector';
 
 @Component({
   selector: 'flight-search',
   templateUrl: './flight-search.component.html',
-  styleUrls: ['./flight-search.component.css']
+  styleUrls: ['./flight-search.component.css'],
+  providers: [ RxConnector ]
 })
 export class FlightSearchComponent implements OnInit {
 
@@ -37,10 +39,21 @@ export class FlightSearchComponent implements OnInit {
     5: true
   };
 
-  constructor(private store: Store<fromFlightBooking.FlightBookingRootState>) {
+  constructor(
+    private store: Store<fromFlightBooking.FlightBookingRootState>,
+    private rxConnector: RxConnector) {
   }
 
   ngOnInit() {
+    /* this.rxConnector.connect(
+      timer(0, 1_000),
+      { next: num => console.log(num) }
+    ); */
+    this.rxConnector.connect(
+      timer(0, 1_000).pipe(
+        tap(num => console.log(num))
+      )
+    );
   }
 
   search(): void {
