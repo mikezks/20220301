@@ -81,9 +81,9 @@ export class FlightTypeaheadComponent implements OnInit, OnDestroy {
       switchMap(city => timedSideEffect(
         this.load(city).pipe(
           catchError(() => of([])),
-          delay(6_000)
+          delay(2_000)
         ),
-        5_000,
+        1_000,
         () => console.log('timeout for side-effect')
       )
       /* {

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientModule } from '@angular/common/http';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { FlightTypeaheadComponent } from './flight-typeahead.component';
 
@@ -8,7 +10,8 @@ describe('FlightTypeaheadComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FlightTypeaheadComponent ]
+      declarations: [ FlightTypeaheadComponent ],
+      imports: [ ReactiveFormsModule, HttpClientModule ]
     })
     .compileComponents();
   });
@@ -22,4 +25,12 @@ describe('FlightTypeaheadComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should load flights async', waitForAsync(() => {
+    component.flights$.subscribe(flights => {
+      expect(flights.length).toBe(2);
+    });
+
+    component.control.setValue('Graz');
+  }));
 });
