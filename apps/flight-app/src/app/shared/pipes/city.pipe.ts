@@ -1,4 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
+import { delay, map, Observable, of, startWith } from 'rxjs';
 
 @Pipe({
   name: 'city',
@@ -6,7 +7,9 @@ import {Pipe, PipeTransform} from '@angular/core';
 })
 export class CityPipe implements PipeTransform {
 
-  transform(value: string, fmt: string): string {
+  transform(value: string, fmt?: string): Observable<string> {
+
+    let result: string = value;
 
     let short, long;
 
@@ -23,9 +26,24 @@ export class CityPipe implements PipeTransform {
         short = long = value; //'ROM';
     }
 
-    if (fmt === 'short') return short;
-    return long;
+    const dataSource = of({ value: 'My City' }).pipe(
+      delay(1_000)
+    );
 
+    if (fmt === 'short') {
+      result = short;
+    } else {
+      result = long;
+    }
+
+    // dataSource.subscribe(data => result = data.value);
+
+    return of(value);
+
+    return dataSource.pipe(
+      map(data => data.value),
+      startWith('Init City')
+    );
   }
 
 }
