@@ -16,7 +16,16 @@ export class FlightSearchComponent implements OnInit {
   from = 'Hamburg'; // in Germany
   to = 'Graz'; // in Austria
   urgent = false;
-  flights$: Observable<Flight[]> = this.store.select(fromFlightBooking.selectActiveUserFlights);
+  /* flights$: Observable<Flight[]> = this.store.pipe(
+    fromFlightBooking.selectItemsByFilter(
+      fromFlightBooking.selectFlights,
+      flight => flight.delayed
+    )
+  ); */
+  /* flights$: Observable<Flight[]> = this.store.pipe(
+    fromFlightBooking.selectDelayedRxOperator()
+  ); */
+  flights$: Observable<Flight[]> = this.store.select(fromFlightBooking.selectFlights);
   /* flights$: Observable<Flight[]> = this.store.pipe(
     select(fromFlightBooking.selectActiveUserFlights),
     map(flights => flights.filter(f => f.id < 4))
