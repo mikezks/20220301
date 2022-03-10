@@ -1,6 +1,7 @@
 import { Flight } from '@flight-workspace/flight-lib';
 import { createReducer, on } from '@ngrx/store';
 import * as FlightBookingActions from './flight-booking.actions';
+import { Filter } from './flight-booking.model';
 
 export const flightBookingFeatureKey = 'flightBooking';
 
@@ -39,6 +40,7 @@ const coding = entityStateTodos.entities[1];
 
 
 export interface State {
+  filter: Filter;
   flights: Flight[];
   passenger: Record<
     number,
@@ -58,6 +60,11 @@ export interface State {
 }
 
 export const initialState: State = {
+  filter: {
+    from: 'Hamburg',
+    to: 'Graz',
+    urgent: false
+  },
   flights: [],
   passenger: {
     1: { id: 1, name: 'Smith', firstName: 'Anne' }
@@ -77,8 +84,18 @@ export interface FlightBookingRootState {
 export const reducer = createReducer(
   initialState,
 
+  on(FlightBookingActions.filterUpdate, (state, action) => {
+    const filter = action.filter;
+    return { ...state, filter };
+  }),
   on(FlightBookingActions.flightsLoaded, (state, action) => {
-    const flights = action.flights;
+    const flights = [
+      ...action.flights,
+      ...state.flights.filter(f => !(
+          f.from === action.flights?.[0].from &&
+          f.to === action.flights?.[0].to
+      ))
+    ];
     return { ...state, flights };
   }),
   on(FlightBookingActions.flightUpdate, (state, action) => {

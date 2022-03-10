@@ -28,6 +28,20 @@ export const selectUser = createSelector(
   (state) => state.user
 );
 
+export const selectFilter = createSelector(
+  selectFlightBookingState,
+  state => state.filter
+);
+
+export const selectActiveFilterFlights = createSelector(
+  selectFlights,
+  selectFilter,
+  (flights, filter) => flights.filter(f =>
+    f.from === filter.from &&
+    f.to === filter.to
+  )
+);
+
 export const selectActiveUserFlights = createSelector(
   // Selectors
   selectFlights,

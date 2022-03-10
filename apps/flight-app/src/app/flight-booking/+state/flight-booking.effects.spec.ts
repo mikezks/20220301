@@ -33,7 +33,7 @@ describe('FlightBookingEffects', () => {
 
   it('should return action flightsLoaded', () => {
     const filter = { from: 'Graz', to: 'Hamburg', urgent: false };
-    const flightsLoadAction = flightsLoad(filter);
+    const flightsLoadAction = flightsLoad({ filter });
     const flights = [{ id: 1, from: 'Graz', to: 'Hamburg', date: 'my date', delayed: false }];
     const flightsLoadedAction = flightsLoaded({ flights });
 

@@ -1,9 +1,20 @@
 import { Flight } from '@flight-workspace/flight-lib';
 import { createAction, props } from '@ngrx/store';
+import { Filter } from './flight-booking.model';
+
+export const flightSearchTriggerd = createAction(
+  '[FlightBooking] Flight search triggered',
+  props<{ filter: Filter }>()
+);
+
+export const filterUpdate = createAction(
+  '[FlightBooking] Filter update',
+  props<{ filter: Filter }>()
+);
 
 export const flightsLoad = createAction(
   '[FlightBooking] Flights load',
-  props<{ from: string, to: string, urgent: boolean }>()
+  props<{ filter: Filter }>()
 );
 
 export const flightsLoaded = createAction(

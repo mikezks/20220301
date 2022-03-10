@@ -2,17 +2,12 @@
 /* eslint-disable @angular-eslint/no-empty-lifecycle-method */
 import { Component, OnInit } from '@angular/core';
 import { Flight } from '@flight-workspace/flight-lib';
-import { Store } from '@ngrx/store';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, tap, timer } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import * as fromFlightBooking from '../+state';
+import { Filter } from '../+state/flight-booking.model';
 import { RxConnector } from '../../shared/rx-utils/rx-connector';
-
-interface Filter {
-  from: string;
-  to: string;
-  urgent: boolean;
-}
 
 interface LocalState {
   filters: Filter[];
@@ -20,8 +15,8 @@ interface LocalState {
 
 const initialLocalState: LocalState = {
   filters: [{
-    from: 'Graz',
-    to: 'Hamburg',
+    from: 'Wien',
+    to: 'Berlin',
     urgent: false
   }]
 };
@@ -34,23 +29,12 @@ const initialLocalState: LocalState = {
 })
 export class FlightSearchComponent implements OnInit {
 
-  from = 'Hamburg'; // in Germany
-  to = 'Graz'; // in Austria
+  from = ''; // in Germany
+  to = ''; // in Austria
   urgent = false;
-  /* flights$: Observable<Flight[]> = this.store.pipe(
-    fromFlightBooking.selectItemsByFilter(
-      fromFlightBooking.selectFlights,
-      flight => flight.delayed
-    )
-  ); */
-  /* flights$: Observable<Flight[]> = this.store.pipe(
-    fromFlightBooking.selectDelayedRxOperator()
-  ); */
-  flights$: Observable<Flight[]> = this.store.select(fromFlightBooking.selectFlights);
-  /* flights$: Observable<Flight[]> = this.store.pipe(
-    select(fromFlightBooking.selectActiveUserFlights),
-    map(flights => flights.filter(f => f.id < 4))
-  ); */
+
+  flights$: Observable<Flight[]> = this.store.select(fromFlightBooking.selectActiveFilterFlights);
+  filter$: Observable<Filter> = this.store.select(fromFlightBooking.selectFilter);
 
   // "shopping basket" with selected flights
   basket: { [id: number]: boolean } = {
@@ -91,11 +75,19 @@ export class FlightSearchComponent implements OnInit {
       timer(0, 1_000),
       { next: num => console.log(num) }
     ); */
-    this.rxConnector.connect(
+    /* this.rxConnector.connect(
       timer(0, 1_000).pipe(
         tap(num => console.log(num))
       )
-    );
+    ) */;
+    this.rxConnector.connect(
+      this.filter$,
+      { next: filter => {
+        this.from = filter.from;
+        this.to = filter.to;
+        this.urgent = !!filter.urgent;
+      }}
+    )
 
     this.localStore.setState(initialLocalState);
   }
@@ -110,11 +102,11 @@ export class FlightSearchComponent implements OnInit {
     });
 
     this.store.dispatch(
-      fromFlightBooking.flightsLoad({
+      fromFlightBooking.flightSearchTriggerd({ filter: {
         from: this.from,
         to: this.to,
         urgent: this.urgent
-      })
+      }})
     );
   }
 
